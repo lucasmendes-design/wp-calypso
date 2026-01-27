@@ -4,7 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSelect } from '@wordpress/data';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getAgentConfig } from '../../constants';
+import { useCalypsoTools, mergeToolProviders } from '../../calypso-tools';
+import { ORCHESTRATOR_AGENT_ID } from '../../constants';
 import { useAgentsManagerContext } from '../../contexts';
 import { useEmptyViewSuggestions } from '../../hooks/use-empty-view-suggestions';
 import { AGENTS_MANAGER_STORE } from '../../stores';
@@ -13,6 +14,7 @@ import { createAgentConfig } from '../../utils/create-agent-config';
 import { loadExternalProviders, type LoadedProviders } from '../../utils/load-external-providers';
 import AgentDock from '../agent-dock';
 import { PersistentRouter } from '../persistent-router';
+import type { ToolProvider } from '../../extension-types';
 import type { UseAgentChatConfig } from '@automattic/agenttic-client';
 
 export interface UnifiedAIAgentProps {
@@ -53,6 +55,9 @@ function AgentSetup( { currentRoute }: UnifiedAIAgentProps ): JSX.Element | null
 	const navigate = useNavigate();
 	const { pathname, state } = useLocation();
 
+	// Get Calypso native tools (navigate, site picker, etc.)
+	const { toolProvider: calypsoToolProvider, SitePickerModalComponent } = useCalypsoTools();
+
 	const isChatRoute = pathname.startsWith( '/chat' );
 	const isNewChat = isChatRoute && !! state?.isNewChat;
 	const routeSessionId = isChatRoute && state?.sessionId;
@@ -89,11 +94,17 @@ function AgentSetup( { currentRoute }: UnifiedAIAgentProps ): JSX.Element | null
 
 			const siteId = typeof site?.ID === 'number' ? site.ID : undefined;
 
+			// Merge Calypso native tools with external provider tools
+			const mergedToolProvider = mergeToolProviders(
+				calypsoToolProvider,
+				providers.toolProvider as ToolProvider | undefined
+			);
+
 			const config = createAgentConfig( {
 				sessionId,
 				siteId,
 				currentRoute,
-				toolProvider: providers.toolProvider,
+				toolProvider: mergedToolProvider,
 				contextProvider: providers.contextProvider,
 				environment: 'calypso',
 				agentId,
@@ -104,7 +115,7 @@ function AgentSetup( { currentRoute }: UnifiedAIAgentProps ): JSX.Element | null
 		}
 
 		initializeAgent();
-	}, [ agentId, version, currentRoute, isNewChat, navigate, sessionId, site?.ID ] );
+	}, [ calypsoToolProvider, currentRoute, isNewChat, navigate, sessionId, site?.ID ] );
 
 	const loadedProviders = loadedProvidersRef.current;
 
@@ -117,16 +128,19 @@ function AgentSetup( { currentRoute }: UnifiedAIAgentProps ): JSX.Element | null
 	}
 
 	return (
-		<AgentDock
-			agentConfig={ agentConfig }
-			emptyViewSuggestions={ emptyViewSuggestions }
-			markdownComponents={ loadedProviders.markdownComponents || {} }
-			markdownExtensions={ loadedProviders.markdownExtensions || {} }
-			useNavigationContinuation={ loadedProviders.useNavigationContinuation }
-			useAbilitiesSetup={ loadedProviders.useAbilitiesSetup }
-			useSuggestions={ loadedProviders.useSuggestions }
-			getChatComponent={ loadedProviders.getChatComponent }
-			siteBuildUtils={ loadedProviders.siteBuildUtils }
-		/>
+		<>
+			<AgentDock
+				agentConfig={ agentConfig }
+				emptyViewSuggestions={ emptyViewSuggestions }
+				markdownComponents={ loadedProviders.markdownComponents || {} }
+				markdownExtensions={ loadedProviders.markdownExtensions || {} }
+				useNavigationContinuation={ loadedProviders.useNavigationContinuation }
+				useAbilitiesSetup={ loadedProviders.useAbilitiesSetup }
+				useSuggestions={ loadedProviders.useSuggestions }
+				getChatComponent={ loadedProviders.getChatComponent }
+				siteBuildUtils={ loadedProviders.siteBuildUtils }
+			/>
+			<SitePickerModalComponent />
+		</>
 	);
 }
