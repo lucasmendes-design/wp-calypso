@@ -149,7 +149,7 @@ export function PurchaseItemSiteIcon( {
 	if ( ! iconUrl && isJetpackPurchase ) {
 		content = (
 			<div className="purchase-item__static-icon">
-				<img src={ jetpackIcon } alt="Jetpack icon" />;
+				<img src={ jetpackIcon } alt="Jetpack icon" />
 			</div>
 		);
 	}
