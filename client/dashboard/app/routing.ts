@@ -1,9 +1,14 @@
+import { isAllowedA4ADashboardHostname } from '../app-a4a/routing';
 import { buildCiabDashboardLink, isAllowedCiabDashboardHostname } from '../app-ciab/routing';
 import { buildDotcomDashboardLink, isAllowedDotcomDashboardHostname } from '../app-dotcom/routing';
 import type { DashboardType } from './types';
 
 export function isAllowedDashboardHostname( hostname?: string ): boolean {
-	return isAllowedDotcomDashboardHostname( hostname ) || isAllowedCiabDashboardHostname( hostname );
+	return (
+		isAllowedDotcomDashboardHostname( hostname ) ||
+		isAllowedCiabDashboardHostname( hostname ) ||
+		isAllowedA4ADashboardHostname( hostname )
+	);
 }
 
 /**

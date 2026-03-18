@@ -145,7 +145,9 @@ export function getSignupUrl( currentQuery, currentRoute, oauth2Client, locale, 
 	if ( redirectTo ) {
 		try {
 			const redirectToUrl = new URL( redirectTo );
-			hasCiabRedirectHost = [ 'my.woo.ai', 'my.woo.localhost' ].includes( redirectToUrl.hostname );
+			hasCiabRedirectHost = [ 'my.woo.ai', 'my.woo.localhost', 'my.a4a.localhost' ].includes(
+				redirectToUrl.hostname
+			);
 		} catch {
 			// no-op
 		}
