@@ -55,6 +55,14 @@
 			line-height: rem(20px);
 			letter-spacing: -0.15px;
 		}
+
+		.subscriber-details__remove-comp-button {
+			margin-inline-start: 8px;
+			font-size: $font-body-small;
+			padding: 0;
+			height: auto;
+			min-height: auto;
+		}
 		@media (max-width: $break-large) {
 			flex-direction: column;
 		}
