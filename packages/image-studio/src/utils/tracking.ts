@@ -34,10 +34,10 @@ export function detectPlatform(): ImageStudioPlatform {
 	}
 
 	// Big Sky plugin sets this global when active
-	if ( window.bigSkyInitialState ) {
-		cachedPlatform = 'wpcom';
-	} else {
+	if ( window.imageStudioData ) {
 		cachedPlatform = 'jetpack';
+	} else {
+		cachedPlatform = 'wpcom';
 	}
 
 	return cachedPlatform;
