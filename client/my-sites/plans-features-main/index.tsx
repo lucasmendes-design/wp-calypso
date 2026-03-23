@@ -393,6 +393,7 @@ const PlansFeaturesMain = ( {
 		variant: differentiatorsVariant,
 		useVar4Features,
 		useVar41MorePremiumFeatures,
+		useVar42NoAiFeatures,
 		isVar4Variant,
 		isExperimentVariant,
 	} = usePlanDifferentiatorsExperiment( { flowName, isInSignup, siteId } );
@@ -475,6 +476,7 @@ const PlansFeaturesMain = ( {
 		isInSignup,
 		useLongSetFeatures: useVar4Features,
 		useVar41MorePremiumFeatures,
+		useVar42NoAiFeatures,
 		isExperimentVariant,
 	} );
 
@@ -501,6 +503,7 @@ const PlansFeaturesMain = ( {
 		reflectStorageSelectionInPlanPrices: true,
 		useLongSetFeatures: useVar4Features,
 		useVar41MorePremiumFeatures,
+		useVar42NoAiFeatures,
 		isExperimentVariant,
 	} );
 
@@ -778,7 +781,7 @@ const PlansFeaturesMain = ( {
 		featureGroupMapForFeaturesGrid = getWooExpressFeaturesGroupedForFeaturesGrid();
 	} else if ( intent === 'plans-wordpress-hosting' ) {
 		featureGroupMapForFeaturesGrid = getWordPressHostingFeaturesGroupedForFeaturesGrid();
-	} else if ( useVar4Features || useVar41MorePremiumFeatures ) {
+	} else if ( useVar4Features || useVar41MorePremiumFeatures || useVar42NoAiFeatures ) {
 		// Experiment: stacked variants should render a single, ordered list (no grouping),
 		// otherwise features get scattered across groups causing gaps and can be filtered out.
 		const featureGroups = getPlanFeaturesGroupedForFeaturesGrid();
