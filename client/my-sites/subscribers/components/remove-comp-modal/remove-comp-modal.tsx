@@ -59,7 +59,7 @@ const RemoveCompModal = ( {
 			overlayClassName="remove-comp-modal"
 			title={ translate( 'Remove complimentary subscription' ) }
 			onRequestClose={ onClose }
-			size="small"
+			size="medium"
 		>
 			<p>
 				{ translate(
@@ -75,7 +75,6 @@ const RemoveCompModal = ( {
 				</Button>
 				<Button
 					variant="primary"
-					isDestructive
 					isBusy={ isSubmitting }
 					onClick={ handleRemove }
 					disabled={ isSubmitting }

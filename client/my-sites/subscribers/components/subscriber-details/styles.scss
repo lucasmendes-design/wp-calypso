@@ -57,11 +57,16 @@
 		}
 
 		.subscriber-details__remove-comp-button {
-			margin-inline-start: 8px;
-			font-size: $font-body-small;
+			margin-inline-start: 4px;
 			padding: 0;
 			height: auto;
 			min-height: auto;
+			vertical-align: text-bottom;
+			color: $studio-gray-60;
+
+			&:hover {
+				color: $studio-gray-80;
+			}
 		}
 		@media (max-width: $break-large) {
 			flex-direction: column;

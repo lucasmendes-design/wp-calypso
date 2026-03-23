@@ -1,6 +1,7 @@
 import config from '@automattic/calypso-config';
 import { TimeSince } from '@automattic/components';
-import { Button, ExternalLink } from '@wordpress/components';
+import { Button, ExternalLink, Icon } from '@wordpress/components';
+import { trash } from '@wordpress/icons';
 import { useTranslate } from 'i18n-calypso';
 import { useMemo } from 'react';
 import { NewsletterCategory } from 'calypso/data/newsletter-categories/types';
@@ -63,7 +64,6 @@ const SubscriberDetails = ( {
 						<Button
 							className="subscriber-details__remove-comp-button"
 							variant="tertiary"
-							isDestructive
 							aria-label={ String(
 								translate( 'Remove complimentary subscription: %(planName)s', {
 									args: { planName: subscriptionPlan.title ?? '' },
@@ -73,7 +73,7 @@ const SubscriberDetails = ( {
 								onRemoveComp( subscriptionPlan.gift_id!, subscriptionPlan.title ?? '' )
 							}
 						>
-							{ translate( 'Remove' ) }
+							<Icon icon={ trash } size={ 18 } />
 						</Button>
 					) }
 				</div>

@@ -1,7 +1,12 @@
 .remove-comp-modal {
+	// Override the core medium size (512px) to match the ConfirmModal used by UnsubscribeModal (563px).
+	.components-modal__frame {
+		max-width: 563px;
+	}
+
 	.remove-comp-modal__buttons {
 		display: flex;
-		gap: 16px;
+		gap: 10px;
 		justify-content: flex-end;
 	}
 }
