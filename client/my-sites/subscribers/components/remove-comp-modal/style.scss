@@ -1,3 +1,4 @@
+@import "@automattic/color-studio/dist/color-variables";
 @import "@automattic/typography/styles/variables";
 
 .remove-comp-modal {
@@ -7,7 +8,7 @@
 	}
 
 	.components-modal__header {
-		border-bottom-color: transparent;
+		border-bottom-color: $studio-gray-0;
 		padding: 18px 24px;
 
 		.components-modal__header-heading {
@@ -16,7 +17,7 @@
 	}
 
 	.components-modal__content {
-		padding: 0 24px 24px;
+		padding: 24px;
 	}
 
 	.remove-comp-modal__buttons {
