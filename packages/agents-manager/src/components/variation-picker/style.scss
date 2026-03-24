@@ -11,9 +11,11 @@
 	}
 
 	&__arrows {
+		position: absolute;
+		bottom: -40px;
+		right: 0;
 		display: flex;
 		align-items: center;
-		align-self: end;
 
 		.components-button {
 			color: var( --color-muted-foreground );
@@ -36,10 +38,4 @@
 	&__pager {
 		color: var( --color-muted-foreground );
 	}
-}
-
-// Reduce gap between arrows and message actions (undo/feedback buttons).
-.agenttic .Message-module_bubble:has( .agents-manager-variation-picker__arrows )
-	+ .MessageActions-module_container {
-	margin-top: -40px;
 }
