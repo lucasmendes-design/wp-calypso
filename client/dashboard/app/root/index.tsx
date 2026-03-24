@@ -2,15 +2,7 @@ import { isEnabled } from '@automattic/calypso-config';
 import { WordPressLogo } from '@automattic/components/src/logos/wordpress-logo';
 import { useQueryClient, useIsFetching } from '@tanstack/react-query';
 import { CatchNotFound, Outlet, useRouterState, useRouter } from '@tanstack/react-router';
-import {
-	Suspense,
-	lazy,
-	useCallback,
-	useEffect,
-	useState,
-	useMemo,
-	useSyncExternalStore,
-} from 'react';
+import { Suspense, lazy, useEffect, useState, useMemo, useSyncExternalStore } from 'react';
 import { LoadingLine } from '../../components/loading-line';
 import { PageViewTracker } from '../../components/page-view-tracker';
 import NotFound from '../404';
@@ -19,7 +11,6 @@ import CommandPalette from '../command-palette';
 import { useAppContext } from '../context';
 import Header from '../header';
 import { NavigationBlockerRegistry } from '../navigation-blocker';
-import OmnibarHeader from '../omnibar-header';
 import ResponsiveSidebar from '../responsive-sidebar';
 import Snackbars from '../snackbars';
 import './style.scss';
@@ -41,8 +32,6 @@ function Root() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const queryCache = queryClient.getQueryCache();
-	const [ isSidebarOpen, setIsSidebarOpen ] = useState( false );
-	const closeSidebar = useCallback( () => setIsSidebarOpen( false ), [ setIsSidebarOpen ] );
 
 	const loadingQueryRequestedFullPageLoader = useSyncExternalStore(
 		( onStoreChange ) => queryCache.subscribe( onStoreChange ),
@@ -117,7 +106,7 @@ function Root() {
 			return <Header />;
 		}
 
-		return <OmnibarHeader onToggleMenu={ () => setIsSidebarOpen( ( value ) => ! value ) } />;
+		return null;
 	};
 
 	const renderBody = () => {
@@ -137,7 +126,8 @@ function Root() {
 
 		return (
 			<div className="dashboard-root__body">
-				<ResponsiveSidebar isOpen={ isSidebarOpen } onClose={ closeSidebar } />
+				{ /* TODO: Pass isOpen/onClose when omnibar toggle is implemented */ }
+				<ResponsiveSidebar />
 				<div className="dashboard-root__content">
 					<main>
 						<CatchNotFound fallback={ NotFound }>

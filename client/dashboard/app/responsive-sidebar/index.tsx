@@ -8,12 +8,12 @@ import Sidebar from './sidebar';
 import './style.scss';
 
 export default function ResponsiveSidebar( {
-	isOpen,
-	onClose,
+	isOpen = false,
+	onClose = () => {},
 }: {
-	isOpen: boolean;
-	onClose: () => void;
-} ) {
+	isOpen?: boolean;
+	onClose?: () => void;
+} = {} ) {
 	const router = useRouter();
 	const isDesktop = useViewportMatch( 'medium' );
 
