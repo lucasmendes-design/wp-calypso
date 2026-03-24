@@ -50,7 +50,7 @@ export default function Variation( {
 
 	return (
 		<div
-			className={ clsx( 'agents-manager-variation', {
+			className={ clsx( 'agents-manager-variation-picker__variation', {
 				'is-active': isActive,
 			} ) }
 			role="button"

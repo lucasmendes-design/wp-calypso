@@ -7,7 +7,7 @@ import {
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft, chevronRight } from '@wordpress/icons';
-import Variation from '../variation';
+import Variation from './variation';
 import type { ColorVariation, GlobalStyles, PaletteColor } from '../styles-preview';
 import './style.scss';
 

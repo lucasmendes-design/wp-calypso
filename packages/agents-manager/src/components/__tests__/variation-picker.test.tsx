@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 import VariationPicker from '../variation-picker';
 
 // Mock the Variation component
-jest.mock( '../variation', () => {
+jest.mock( '../variation-picker/variation', () => {
 	const MockVariation = ( { variation }: { variation: { title: string } } ) => (
 		<div data-testid="variation">{ variation?.title }</div>
 	);

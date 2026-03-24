@@ -3,7 +3,7 @@
  */
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Variation from '../variation';
+import Variation from '../variation-picker/variation';
 
 // Mock StylesPreview
 jest.mock( '../styles-preview', () => {
