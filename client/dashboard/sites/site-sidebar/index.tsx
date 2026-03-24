@@ -39,7 +39,7 @@ import { hasSiteTrialEnded } from '../../utils/site-trial';
 import { getSiteTypeFeatureSupports } from '../../utils/site-type-feature-support';
 import { isSelfHostedJetpackConnected } from '../../utils/site-types';
 import { canSwitchEnvironment } from '../features';
-import EnvironmentSwitcher from '../site/environment-switcher-v2';
+import SidebarEnvironmentSwitcher from '../site/sidebar-environment-switcher';
 import type { Site } from '@automattic/api-core';
 import type { AnyRoute } from '@tanstack/react-router';
 
@@ -63,7 +63,7 @@ export default function SiteSidebar() {
 				<Suspense fallback={ null }>
 					<SidebarMenu>
 						<SiteSwitcherV2 />
-						{ canSwitchEnvironment( site ) && <EnvironmentSwitcher site={ site } /> }
+						{ canSwitchEnvironment( site ) && <SidebarEnvironmentSwitcher site={ site } /> }
 					</SidebarMenu>
 				</Suspense>
 				<SiteMenuSidebar site={ site } />
