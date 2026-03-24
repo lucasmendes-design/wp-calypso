@@ -10,6 +10,7 @@ import { createMeRoutes } from './me';
 import { createPluginsRoutes } from './plugins';
 import { rootRoute } from './root';
 import { createSitesRoutes } from './sites';
+import { ssoBridgeRoute } from './sso-bridge';
 import type { SiteTypeFeature } from '../../utils/site-type-feature-support';
 import type { AppConfig } from '../context';
 import type { ErrorInfo } from 'react';
@@ -65,6 +66,10 @@ const createRouteTree = ( config: AppConfig ) => {
 
 	if ( config.supports.me ) {
 		children.push( ...createMeRoutes( config ) );
+	}
+
+	if ( config.supports.ssoBridge ) {
+		children.push( ssoBridgeRoute );
 	}
 
 	return rootRoute.addChildren( children );

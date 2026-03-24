@@ -46,6 +46,7 @@ export type AppConfig = {
 		me: MeSupports | false;
 		commandPalette: boolean;
 		domainOnlySites: boolean;
+		ssoBridge: boolean;
 	};
 	posthog?: string;
 	optIn: boolean;
@@ -80,6 +81,7 @@ export const APP_CONTEXT_DEFAULT_CONFIG: AppConfig = {
 		me: false,
 		commandPalette: false,
 		domainOnlySites: false,
+		ssoBridge: false,
 	},
 	optIn: false,
 	components: {},

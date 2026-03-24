@@ -43,6 +43,7 @@ boot( {
 		plugins: false,
 		commandPalette: false,
 		domainOnlySites: false,
+		ssoBridge: true,
 	},
 	optIn: false,
 	components: {

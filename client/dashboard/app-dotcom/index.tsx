@@ -41,6 +41,7 @@ boot( {
 		plugins: true,
 		commandPalette: false,
 		domainOnlySites: true,
+		ssoBridge: false,
 	},
 	optIn: true,
 	components: {
