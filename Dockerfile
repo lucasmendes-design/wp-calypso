@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.20
 
 ARG use_cache=false
-ARG node_version=22.9.0
+ARG node_version=22.22.1
 ARG base_image=registry.a8c.com/calypso/base:latest
 
 ###################
