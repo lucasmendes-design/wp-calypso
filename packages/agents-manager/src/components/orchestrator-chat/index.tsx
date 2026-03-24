@@ -13,9 +13,9 @@ import { useAgentsManagerContext } from '../../contexts';
 import useAbilitiesRegistration from '../../hooks/use-abilities-registration';
 import useCheckpoint from '../../hooks/use-checkpoint';
 import useCheckpointAction from '../../hooks/use-checkpoint-action';
+import useConversation from '../../hooks/use-conversation';
 import useCopyAction from '../../hooks/use-copy-action';
 import useFeedbackAction from '../../hooks/use-feedback-action';
-import useFetchSelectedConversation from '../../hooks/use-fetch-selected-conversation';
 import useSaveNewChatRoute from '../../hooks/use-save-new-chat-route';
 import convertToolMessagesToComponents from '../../utils/convert-tool-messages-to-components';
 import isAmAbilitiesEnabled from '../../utils/is-am-abilities-enabled';
@@ -121,8 +121,7 @@ export default function OrchestratorChat( {
 		progressMessage,
 	} = useAgentChat( agentConfig! );
 
-	// Fetch the conversation when the user selects one from the history list.
-	const { isLoading: isLoadingConversation } = useFetchSelectedConversation( {
+	const { isLoading: isLoadingConversation } = useConversation( {
 		onSuccess: ( loadedMessages, serverSessionId ) => {
 			// Update the UI with the loaded messages
 			loadMessages( loadedMessages );
