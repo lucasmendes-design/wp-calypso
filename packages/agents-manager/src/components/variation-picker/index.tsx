@@ -35,7 +35,7 @@ interface Props {
 	maxToShow?: number;
 	type: 'color' | 'font' | 'button';
 	numSuggestions?: number;
-	onSelect: ( variation: ColorVariation ) => void;
+	onSelect?: ( variation: ColorVariation ) => void;
 	onPaginate?: ( direction: 'prev' | 'next' ) => void;
 	activeVariationTitle?: string | null;
 	globalStyles: GlobalStyles;

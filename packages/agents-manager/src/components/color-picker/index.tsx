@@ -1,4 +1,5 @@
 import { useEffect, useState } from '@wordpress/element';
+import useApplyColorVariation from '../../hooks/use-apply-color-variation';
 import VariationPicker from '../variation-picker';
 import type { ColorVariation, GlobalStyles, PaletteColor } from '../styles-preview';
 
@@ -127,6 +128,7 @@ export default function ColorPicker( {
 	themeColors = [],
 	currentColorVariation,
 }: Props ) {
+	const applyColorVariation = useApplyColorVariation();
 	const [ colorVariations, setColorVariations ] = useState< ColorVariation[] >( [] );
 
 	useEffect( () => {
@@ -142,7 +144,7 @@ export default function ColorPicker( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
 	}, [] );
 
-	if ( colorVariations.length === 0 ) {
+	if ( ! colorVariations.length ) {
 		return null;
 	}
 
@@ -151,7 +153,10 @@ export default function ColorPicker( {
 			variations={ colorVariations }
 			maxToShow={ 4 }
 			type="color"
-			onSelect={ onSelect }
+			onSelect={ ( variation ) => {
+				applyColorVariation( variation );
+				onSelect( variation );
+			} }
 			activeVariationTitle={ currentColor }
 			globalStyles={ globalStyles }
 			paletteColors={ paletteColors }

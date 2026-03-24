@@ -8,7 +8,7 @@ interface Props {
 	variation: ColorVariation;
 	type: 'color' | 'font' | 'button';
 	isActive?: boolean;
-	onSelect: ( variation: ColorVariation ) => void;
+	onSelect?: ( variation: ColorVariation ) => void;
 	globalStyles: GlobalStyles;
 	paletteColors: PaletteColor[];
 	themeColors: PaletteColor[];
@@ -28,7 +28,7 @@ export default function Variation( {
 	fontFamiliesToCSS,
 }: Props ) {
 	const handleSelectVariation = () => {
-		onSelect( variation );
+		onSelect?.( variation );
 	};
 
 	const selectOnEnter = ( event: React.KeyboardEvent ) => {
