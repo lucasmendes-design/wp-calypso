@@ -2,13 +2,22 @@ import { isEnabled } from '@automattic/calypso-config';
 import { WordPressLogo } from '@automattic/components/src/logos/wordpress-logo';
 import { useQueryClient, useIsFetching } from '@tanstack/react-query';
 import { CatchNotFound, Outlet, useRouterState, useRouter } from '@tanstack/react-router';
-import { Suspense, lazy, useEffect, useState, useMemo, useSyncExternalStore } from 'react';
+import {
+	Suspense,
+	lazy,
+	useCallback,
+	useEffect,
+	useState,
+	useMemo,
+	useSyncExternalStore,
+} from 'react';
 import { LoadingLine } from '../../components/loading-line';
 import { PageViewTracker } from '../../components/page-view-tracker';
 import NotFound from '../404';
 import { bumpStat } from '../analytics';
 import CommandPalette from '../command-palette';
 import { useAppContext } from '../context';
+import { DASHBOARD_EVENT_TYPES, dispatchDashboardEvent, subscribeDashboardEvent } from '../events';
 import Header from '../header';
 import { NavigationBlockerRegistry } from '../navigation-blocker';
 import ResponsiveSidebar from '../responsive-sidebar';
@@ -32,6 +41,24 @@ function Root() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const queryCache = queryClient.getQueryCache();
+	const [ isSidebarOpen, setIsSidebarOpen ] = useState( false );
+	const closeSidebar = useCallback( () => {
+		setIsSidebarOpen( false );
+		dispatchDashboardEvent( { type: DASHBOARD_EVENT_TYPES.SIDEBAR_CLOSE } );
+	}, [] );
+
+	// Listen for sidebar events from the InterimOmnibar (masterbar).
+	useEffect(
+		() =>
+			subscribeDashboardEvent( ( { type } ) => {
+				if ( type === DASHBOARD_EVENT_TYPES.SIDEBAR_OPEN ) {
+					setIsSidebarOpen( true );
+				} else if ( type === DASHBOARD_EVENT_TYPES.SIDEBAR_CLOSE ) {
+					setIsSidebarOpen( false );
+				}
+			} ),
+		[]
+	);
 
 	const loadingQueryRequestedFullPageLoader = useSyncExternalStore(
 		( onStoreChange ) => queryCache.subscribe( onStoreChange ),
@@ -126,8 +153,7 @@ function Root() {
 
 		return (
 			<div className="dashboard-root__body">
-				{ /* TODO: Pass isOpen/onClose when omnibar toggle is implemented */ }
-				<ResponsiveSidebar />
+				<ResponsiveSidebar isOpen={ isSidebarOpen } onClose={ closeSidebar } />
 				<div className="dashboard-root__content">
 					<main>
 						<CatchNotFound fallback={ NotFound }>

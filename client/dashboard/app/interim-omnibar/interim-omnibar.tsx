@@ -1,9 +1,11 @@
 /* eslint-disable no-restricted-imports */
 import { isEcommercePlan } from '@automattic/calypso-products';
+import { useCallback, useEffect, useState } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { MasterbarLoggedIn } from 'calypso/layout/masterbar/logged-in';
 import { recordTracksEvent } from 'calypso/lib/analytics/tracks';
 import { getLogoutUrl } from 'calypso/lib/user/shared-utils';
+import { DASHBOARD_EVENT_TYPES, dispatchDashboardEvent, subscribeDashboardEvent } from '../events';
 import type { User, Site } from '@automattic/api-core';
 
 const noop = () => {};
@@ -33,6 +35,29 @@ export function InterimOmnibar( { user: userProp, site }: Props ) {
 	const siteId = user.primary_blog ?? null;
 	const siteSlug = site?.slug ?? null;
 	const siteAdminUrl = site?.options?.admin_url ?? null;
+
+	const [ layoutFocus, setLayoutFocus ] = useState< 'content' | 'sidebar' >( 'content' );
+
+	const setNextLayoutFocus = useCallback( ( focus: 'content' | 'sidebar' ) => {
+		setLayoutFocus( focus );
+		dispatchDashboardEvent( {
+			type:
+				focus === 'sidebar'
+					? DASHBOARD_EVENT_TYPES.SIDEBAR_OPEN
+					: DASHBOARD_EVENT_TYPES.SIDEBAR_CLOSE,
+		} );
+	}, [] );
+
+	// Listen for sidebar close events from the Dashboard root component.
+	useEffect(
+		() =>
+			subscribeDashboardEvent( ( { type } ) => {
+				if ( type === DASHBOARD_EVENT_TYPES.SIDEBAR_CLOSE ) {
+					setLayoutFocus( 'content' );
+				}
+			} ),
+		[]
+	);
 
 	return (
 		<ReduxProvider store={ noopStore }>
@@ -68,7 +93,7 @@ export function InterimOmnibar( { user: userProp, site }: Props ) {
 				// Navigation / layout
 				section=""
 				sectionGroup=""
-				currentLayoutFocus={ null }
+				currentLayoutFocus={ layoutFocus }
 				currentRoute={ typeof window !== 'undefined' ? window.location.pathname : '/' }
 				previousPath=""
 				newPostUrl={ siteAdminUrl ? `${ siteAdminUrl }post-new.php` : '' }
@@ -88,7 +113,7 @@ export function InterimOmnibar( { user: userProp, site }: Props ) {
 				migrationStatus={ null }
 				adminMenu={ null }
 				// Actions
-				setNextLayoutFocus={ noop }
+				setNextLayoutFocus={ setNextLayoutFocus }
 				activateNextLayoutFocus={ noop }
 				recordTracksEvent={ recordTracksEvent }
 				updateSiteMigrationMeta={ noop }
