@@ -10,12 +10,15 @@ import { __ } from '@wordpress/i18n';
 import { useNavigate } from 'react-router-dom';
 import { LOCAL_TOOL_RUNNING_MESSAGE } from '../../constants';
 import { useAgentsManagerContext } from '../../contexts';
+import useAbilitiesRegistration from '../../hooks/use-abilities-registration';
+import useCheckpoint from '../../hooks/use-checkpoint';
 import useCheckpointAction from '../../hooks/use-checkpoint-action';
 import useCopyAction from '../../hooks/use-copy-action';
 import useFeedbackAction from '../../hooks/use-feedback-action';
 import useFetchSelectedConversation from '../../hooks/use-fetch-selected-conversation';
 import useSaveNewChatRoute from '../../hooks/use-save-new-chat-route';
 import convertToolMessagesToComponents from '../../utils/convert-tool-messages-to-components';
+import isAmAbilitiesEnabled from '../../utils/is-am-abilities-enabled';
 import { persistLastActivity } from '../../utils/persist-last-activity';
 import AgentChat from '../agent-chat';
 import { type Options as ChatHeaderOptions } from '../chat-header';
@@ -83,7 +86,7 @@ export default function OrchestratorChat( {
 	getChatComponent,
 	siteBuildUtils,
 	useImageUpload,
-	useCheckpoint,
+	useCheckpoint: useExternalCheckpoint,
 	onHasMessagesChange,
 }: Props ) {
 	const { agentConfig, getActiveSessionId, siteKey } = useAgentsManagerContext();
@@ -151,8 +154,13 @@ export default function OrchestratorChat( {
 	// Persist the chat route so the conversation can be resumed later.
 	useSaveNewChatRoute( messages );
 
-	// Register an "Undo" action on agent messages with checkpoints.
-	const checkpoint = useCheckpoint?.();
+	const enableAmAbilities = isAmAbilitiesEnabled();
+
+	// Both hooks are called unconditionally to satisfy React rules.
+	// Only the result matching the flag is used.
+	const amCheckpoint = useCheckpoint();
+	const bsCheckpoint = useExternalCheckpoint?.();
+	const checkpoint = enableAmAbilities ? amCheckpoint : bsCheckpoint;
 	useCheckpointAction( registerMessageActions, checkpoint );
 
 	// Register thumbs-up/down feedback actions on agent messages.
@@ -243,40 +251,45 @@ export default function OrchestratorChat( {
 		};
 	}, [] );
 
-	// Invoke abilities setup hook to register hook-based abilities that utilize React context.
-	// Provides custom action handlers for agent and chat interaction within Big Sky's AI store.
-	// The hook is stable as `OrchestratorChat` only renders after external providers have been loaded.
-	useAbilitiesSetup?.( {
-		addMessage: ( message: BigSkyMessage ) => {
-			// Transform Big Sky message format to `UIMessage` format and add to chat
-			addMessage( {
-				// Keep Big Sky message properties without explicit mapping to keep linter happy
-				// Big Sky messages sometimes have a `context` field used by the
-				// site build to show the progress indicator
-				...message,
-				id: message.id,
-				role: message.role === 'assistant' ? 'agent' : 'user',
-				content: message.content,
-				timestamp: message.created_at ? message.created_at * 1000 : Date.now(),
-				archived: message.archived ?? false,
-				showIcon: message.showIcon ?? true,
-			} );
-		},
-		clearMessages: () => loadMessages( [] ),
-		clearSuggestions,
-		getAgentManager,
-		setIsThinking,
-		deleteMarkedMessages: ( msgs ) => {
-			setDeletedMessageIds(
-				( prevIds ) => new Set( [ ...prevIds, ...msgs.map( ( msg ) => msg.id ) ] )
-			);
-		},
-		// This ensures the same session ID is used between Big Sky and Calypso agents,
-		// so that messages will be stored in the same conversation.
-		getSessionId: getActiveSessionId,
-		setIsBuildingSite,
-		setThinkingMessage,
-	} );
+	if ( enableAmAbilities ) {
+		// eslint-disable-next-line react-hooks/rules-of-hooks -- stable conditional (URL param)
+		useAbilitiesRegistration( {
+			showComponent: {
+				currentPostId,
+				getClientIdMap: () => ( {} ), // TODO: wire from big-sky context provider
+				setCheckpoint: ( id, keys ) => checkpoint?.setCheckpoint( id, keys ),
+				addNewPageToCheckpoint: ( pageId ) => checkpoint?.addNewPageToCheckpoint( pageId ),
+				isBuildingSite,
+			},
+		} );
+	} else {
+		// eslint-disable-next-line react-hooks/rules-of-hooks -- stable conditional (URL param)
+		useAbilitiesSetup?.( {
+			addMessage: ( message: BigSkyMessage ) => {
+				addMessage( {
+					...message,
+					id: message.id,
+					role: message.role === 'assistant' ? 'agent' : 'user',
+					content: message.content,
+					timestamp: message.created_at ? message.created_at * 1000 : Date.now(),
+					archived: message.archived ?? false,
+					showIcon: message.showIcon ?? true,
+				} );
+			},
+			clearMessages: () => loadMessages( [] ),
+			clearSuggestions,
+			getAgentManager,
+			setIsThinking,
+			deleteMarkedMessages: ( msgs ) => {
+				setDeletedMessageIds(
+					( prevIds ) => new Set( [ ...prevIds, ...msgs.map( ( msg ) => msg.id ) ] )
+				);
+			},
+			getSessionId: getActiveSessionId,
+			setIsBuildingSite,
+			setThinkingMessage,
+		} );
+	}
 
 	const displayedMessages = useMemo( () => {
 		let currentMessages = messages;

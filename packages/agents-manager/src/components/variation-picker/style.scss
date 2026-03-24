@@ -1,0 +1,37 @@
+.agents-manager__variation-picker {
+	position: relative;
+	pointer-events: all;
+	min-height: unset;
+}
+
+.agents-manager__variation-picker-grid {
+	.block-editor-iframe__scale-container {
+		flex: 1 0 fit-content;
+		display: flex;
+	}
+}
+
+.agents-manager__variation-picker-arrows {
+	bottom: -40px;
+
+	.components-button {
+		color: var(--color-muted-foreground);
+
+		&:not( :disabled ):hover {
+			color: var(--color-foreground);
+		}
+
+		&:disabled {
+			opacity: 0.5;
+		}
+
+		&.is-pressed {
+			color: var(--color-foreground);
+			background-color: var(--color-muted);
+		}
+	}
+}
+
+.agents-manager__variation-picker-pager {
+	color: var(--color-muted-foreground);
+}

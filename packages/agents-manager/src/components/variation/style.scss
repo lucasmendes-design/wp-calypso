@@ -1,0 +1,22 @@
+.agents-manager__variation {
+	&.is-active,
+	&:focus-visible {
+		.edit-site-global-styles-variations_item-preview {
+			outline: var(--color-link) solid var(--wp-admin-border-width-focus);
+			outline-offset: 1px;
+		}
+	}
+
+	&:not( .is-active ):hover {
+		.edit-site-global-styles-variations_item-preview {
+			outline-color: var(--color-muted-foreground);
+		}
+	}
+}
+
+.edit-site-global-styles-variations_item-preview {
+	outline: var(--color-muted) solid 1px;
+	/* stylelint-disable-next-line scales/radii */
+	border-radius: 6px;
+	overflow: hidden;
+}

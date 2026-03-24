@@ -1,6 +1,8 @@
 import { EscalationButton } from '../components/escalation-button';
+import NextStepButton from '../components/next-step-button';
 import SourcesDisplay from '../components/sources-display';
 import UnavailableToolMessage from '../components/unavailable-tool-message';
+import isAmAbilitiesEnabled from './is-am-abilities-enabled';
 import { isEditorPage } from './is-editor-page';
 import type { GetChatComponent } from './load-external-providers';
 import type { UIMessage } from '@automattic/agenttic-client';
@@ -43,6 +45,163 @@ function extractSourcesFromContent( messages: UIMessage[] ): UIMessage[] {
 
 		return { ...message, content: updatedContent };
 	} );
+}
+
+interface ShowComponentData {
+	type: string;
+	props: Record< string, unknown >;
+	followUpTasks?: boolean;
+	isCurrent: boolean;
+	postId?: number;
+}
+
+interface ShowComponentHandlerArgs {
+	message: UIMessage;
+	data: ShowComponentData;
+	index: number;
+	array: UIMessage[];
+	getChatComponent?: GetChatComponent;
+	currentPostId?: number;
+}
+
+/**
+ * Big Sky handler: resolves components via `getChatComponent` from external providers.
+ */
+function handleShowComponentBs( {
+	message,
+	data,
+	index,
+	array,
+	getChatComponent,
+	currentPostId,
+}: ShowComponentHandlerArgs ): UIMessage[] {
+	if ( ! isEditorPage() ) {
+		return [
+			{
+				...message,
+				content: [
+					{
+						type: 'component' as const,
+						component: UnavailableToolMessage as React.ComponentType,
+						componentProps: { type: 'picker' },
+					},
+				],
+			},
+		];
+	}
+
+	const { type: contentType, props, followUpTasks, isCurrent, postId } = data;
+	const Component = getChatComponent?.( contentType );
+
+	if ( ! Component ) {
+		return [];
+	}
+
+	const isLastMessage = index === array.length - 1;
+	const isPageChanged = !! postId && !! currentPostId && postId !== currentPostId;
+	const isStale = ! isLastMessage || ! isCurrent || isPageChanged;
+
+	const componentMessage = {
+		...message,
+		content: [
+			{
+				type: 'component' as const,
+				component: Component,
+				componentProps: { ...( props as object ), contentType },
+			},
+		],
+		disabled: isStale,
+	};
+
+	const BsNextStep = getChatComponent?.( 'next-step-button' );
+	if ( isStale || ! followUpTasks || ! BsNextStep ) {
+		return [ componentMessage ];
+	}
+
+	return [
+		componentMessage,
+		{
+			...message,
+			id: `${ message.id }-next-step`,
+			content: [
+				{
+					type: 'component' as const,
+					component: BsNextStep,
+				},
+			],
+		},
+	];
+}
+
+/**
+ * AM handler: uses decoupled components from agents-manager directly.
+ */
+function handleShowComponentAm( {
+	message,
+	data,
+	index,
+	array,
+	getChatComponent,
+	currentPostId,
+}: ShowComponentHandlerArgs ): UIMessage[] {
+	if ( ! isEditorPage() ) {
+		return [
+			{
+				...message,
+				content: [
+					{
+						type: 'component' as const,
+						component: UnavailableToolMessage as React.ComponentType,
+						componentProps: { type: 'picker' },
+					},
+				],
+			},
+		];
+	}
+
+	const { type: contentType, props, followUpTasks, isCurrent, postId } = data;
+
+	// TODO: resolve AM components directly by `contentType` as they are decoupled.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- runtime value from JSON
+	const Component = getChatComponent?.( contentType as any );
+
+	if ( ! Component ) {
+		return [];
+	}
+
+	const isLastMessage = index === array.length - 1;
+	const isPageChanged = !! postId && !! currentPostId && postId !== currentPostId;
+	const isStale = ! isLastMessage || ! isCurrent || isPageChanged;
+
+	const componentMessage = {
+		...message,
+		content: [
+			{
+				type: 'component' as const,
+				component: Component,
+				componentProps: { ...( props as object ), contentType },
+			},
+		],
+		disabled: isStale,
+	};
+
+	if ( isStale || ! followUpTasks ) {
+		return [ componentMessage ];
+	}
+
+	return [
+		componentMessage,
+		{
+			...message,
+			id: `${ message.id }-next-step`,
+			content: [
+				{
+					type: 'component' as const,
+					component: NextStepButton as React.ComponentType,
+				},
+			],
+		},
+	];
 }
 
 interface Options {
@@ -101,70 +260,16 @@ export default function convertToolMessagesToComponents( {
 
 		// Handle `show-component` tool message
 		if ( textData.tool_id === 'big_sky__show_component' ) {
-			// If not on an editor page, show an unavailable tool message instead of the component
-			if ( ! isEditorPage() ) {
-				return [
-					{
-						...message,
-						content: [
-							{
-								type: 'component' as const,
-								component: UnavailableToolMessage as React.ComponentType,
-								componentProps: { type: 'picker' },
-							},
-						],
-					},
-				];
-			}
+			const handler = isAmAbilitiesEnabled() ? handleShowComponentAm : handleShowComponentBs;
 
-			const { type: contentType, props, followUpTasks, isCurrent, postId } = textData.data ?? {};
-			const Component = getChatComponent?.( contentType );
-
-			// No matching component found for this content type — drop the message to avoid showing raw JSON.
-			if ( ! Component ) {
-				return [];
-			}
-
-			// Whether this is the last message in the array.
-			const isLastMessage = index === array.length - 1;
-
-			// In the site editor, React-Query caching keeps past conversations alive when the
-			// user navigates to a different page. Compare the picker's `postId` with the
-			// current editor page to disable pickers that no longer belong to this page.
-			const isPageChanged = !! postId && !! currentPostId && postId !== currentPostId;
-			const isStale = ! isLastMessage || ! isCurrent || isPageChanged;
-
-			const componentMessage = {
-				...message,
-				content: [
-					{
-						type: 'component' as const,
-						component: Component,
-						componentProps: { ...props, contentType },
-					},
-				],
-				disabled: isStale,
-			};
-
-			// Only show `next-step-button` when the component is active and has follow-up tasks.
-			const NextStepButton = getChatComponent?.( 'next-step-button' );
-			if ( isStale || ! followUpTasks || ! NextStepButton ) {
-				return [ componentMessage ];
-			}
-
-			return [
-				componentMessage,
-				{
-					...message,
-					id: `${ message.id }-next-step`,
-					content: [
-						{
-							type: 'component' as const,
-							component: NextStepButton,
-						},
-					],
-				},
-			];
+			return handler( {
+				message,
+				data: ( textData.data ?? {} ) as ShowComponentData,
+				index,
+				array,
+				getChatComponent,
+				currentPostId,
+			} );
 		}
 
 		// Handle `apply-block-edits` tool message
