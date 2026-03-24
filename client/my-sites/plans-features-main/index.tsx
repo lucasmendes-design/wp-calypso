@@ -391,11 +391,10 @@ const PlansFeaturesMain = ( {
 		isLoading: isLoadingDifferentiatorsExperiment,
 		showDifferentiatorHeader,
 		variant: differentiatorsVariant,
-		useVar4Features,
+		useFocusedComparisonFeatures,
 		useVar41MorePremiumFeatures,
 		useVar42NoAiFeatures,
 		showPricingDifferentiationFeaturePills,
-		isVar4Variant,
 		isExperimentVariant,
 	} = usePlanDifferentiatorsExperiment( { flowName, isInSignup, siteId } );
 
@@ -475,7 +474,7 @@ const PlansFeaturesMain = ( {
 		isDomainOnlySite,
 		reflectStorageSelectionInPlanPrices: true,
 		isInSignup,
-		useLongSetFeatures: useVar4Features,
+		useFocusedComparisonFeatures,
 		useVar41MorePremiumFeatures,
 		useVar42NoAiFeatures,
 		showPricingDifferentiationFeaturePills,
@@ -503,7 +502,7 @@ const PlansFeaturesMain = ( {
 		isDomainOnlySite,
 		term,
 		reflectStorageSelectionInPlanPrices: true,
-		useLongSetFeatures: useVar4Features,
+		useFocusedComparisonFeatures,
 		useVar41MorePremiumFeatures,
 		useVar42NoAiFeatures,
 		showPricingDifferentiationFeaturePills,
@@ -784,7 +783,11 @@ const PlansFeaturesMain = ( {
 		featureGroupMapForFeaturesGrid = getWooExpressFeaturesGroupedForFeaturesGrid();
 	} else if ( intent === 'plans-wordpress-hosting' ) {
 		featureGroupMapForFeaturesGrid = getWordPressHostingFeaturesGroupedForFeaturesGrid();
-	} else if ( useVar4Features || useVar41MorePremiumFeatures || useVar42NoAiFeatures ) {
+	} else if (
+		useFocusedComparisonFeatures ||
+		useVar41MorePremiumFeatures ||
+		useVar42NoAiFeatures
+	) {
 		// Experiment: stacked variants should render a single, ordered list (no grouping),
 		// otherwise features get scattered across groups causing gaps and can be filtered out.
 		const featureGroups = getPlanFeaturesGroupedForFeaturesGrid();
@@ -978,8 +981,8 @@ const PlansFeaturesMain = ( {
 										enableTermSavingsPriceDisplay={ enableTermSavingsPriceDisplay }
 										showSimplifiedBillingDescription={ isInSignup }
 										showBillingDescriptionForIncreasedRenewalPrice={ renewalPricingVariation }
-										isVar4Variant={ isVar4Variant }
 										isExperimentVariant={ isExperimentVariant }
+										useFocusedComparisonFeatures={ useFocusedComparisonFeatures }
 									/>
 								) }
 								{ showEscapeHatch && hidePlansFeatureComparison && viewAllPlansButton }
