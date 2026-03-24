@@ -1,3 +1,4 @@
+import ColorPicker from '../components/color-picker';
 import { EscalationButton } from '../components/escalation-button';
 import NextStepButton from '../components/next-step-button';
 import SourcesDisplay from '../components/sources-display';
@@ -5,14 +6,15 @@ import UnavailableToolMessage from '../components/unavailable-tool-message';
 import isAmAbilitiesEnabled from './is-am-abilities-enabled';
 import { isEditorPage } from './is-editor-page';
 import type { GetChatComponent } from './load-external-providers';
-import type { UIMessage } from '@automattic/agenttic-client';
+import type { ShowComponentType } from '../abilities/types';
+import type { UIMessage, UseAgentChatReturn } from '@automattic/agenttic-client';
 
 // Tool IDs that are silently dropped without a console warning.
 const SILENT_TOOL_IDS = [ 'big_sky__set_processing_state' ];
 
 /**
  * Scans message content blocks for JSON-encoded sources data and replaces
- * those blocks with a SourcesDisplay component. Text blocks that don't parse
+ * those blocks with a `SourcesDisplay` component. Text blocks that don't parse
  * as JSON (i.e. the actual answer text) are left untouched.
  */
 function extractSourcesFromContent( messages: UIMessage[] ): UIMessage[] {
@@ -48,7 +50,7 @@ function extractSourcesFromContent( messages: UIMessage[] ): UIMessage[] {
 }
 
 interface ShowComponentData {
-	type: string;
+	type: ShowComponentType;
 	props: Record< string, unknown >;
 	followUpTasks?: boolean;
 	isCurrent: boolean;
@@ -62,10 +64,11 @@ interface ShowComponentHandlerArgs {
 	array: UIMessage[];
 	getChatComponent?: GetChatComponent;
 	currentPostId?: number;
+	onSubmit?: UseAgentChatReturn[ 'onSubmit' ];
 }
 
 /**
- * Big Sky handler: resolves components via `getChatComponent` from external providers.
+ * Big Sky handler — resolves components via `getChatComponent()` from external providers.
  */
 function handleShowComponentBs( {
 	message,
@@ -107,7 +110,7 @@ function handleShowComponentBs( {
 			{
 				type: 'component' as const,
 				component: Component,
-				componentProps: { ...( props as object ), contentType },
+				componentProps: { ...props, contentType },
 			},
 		],
 		disabled: isStale,
@@ -134,15 +137,27 @@ function handleShowComponentBs( {
 }
 
 /**
- * AM handler: uses decoupled components from agents-manager directly.
+ * Resolves a `ShowComponentType` to its React component.
+ */
+function getShowComponent( type: ShowComponentType ): React.ComponentType | null {
+	switch ( type ) {
+		case 'color-picker':
+			return ColorPicker as React.ComponentType;
+		default:
+			return null;
+	}
+}
+
+/**
+ * AM handler — uses decoupled components from agents-manager via `getShowComponent()`.
  */
 function handleShowComponentAm( {
 	message,
 	data,
 	index,
 	array,
-	getChatComponent,
 	currentPostId,
+	onSubmit,
 }: ShowComponentHandlerArgs ): UIMessage[] {
 	if ( ! isEditorPage() ) {
 		return [
@@ -161,9 +176,7 @@ function handleShowComponentAm( {
 
 	const { type: contentType, props, followUpTasks, isCurrent, postId } = data;
 
-	// TODO: resolve AM components directly by `contentType` as they are decoupled.
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- runtime value from JSON
-	const Component = getChatComponent?.( contentType as any );
+	const Component = getShowComponent( contentType );
 
 	if ( ! Component ) {
 		return [];
@@ -179,7 +192,7 @@ function handleShowComponentAm( {
 			{
 				type: 'component' as const,
 				component: Component,
-				componentProps: { ...( props as object ), contentType },
+				componentProps: props,
 			},
 		],
 		disabled: isStale,
@@ -198,6 +211,9 @@ function handleShowComponentAm( {
 				{
 					type: 'component' as const,
 					component: NextStepButton as React.ComponentType,
+					componentProps: {
+						onClick: () => onSubmit?.( 'Moving to next step' ),
+					},
 				},
 			],
 		},
@@ -208,6 +224,7 @@ interface Options {
 	messages: UIMessage[];
 	getChatComponent?: GetChatComponent;
 	currentPostId?: number;
+	onSubmit?: UseAgentChatReturn[ 'onSubmit' ];
 }
 
 /**
@@ -217,8 +234,9 @@ export default function convertToolMessagesToComponents( {
 	messages,
 	getChatComponent,
 	currentPostId,
+	onSubmit,
 }: Options ): UIMessage[] {
-	// First pass: extract sources data blocks into SourcesDisplay components.
+	// Extract sources data blocks into `SourcesDisplay` components.
 	const messagesWithSources = extractSourcesFromContent( messages );
 
 	return messagesWithSources.flatMap( ( message, index, array ) => {
@@ -250,7 +268,7 @@ export default function convertToolMessagesToComponents( {
 			};
 		}
 
-		// The tool message is a JSON string. Try to parse it, falling back to the original if invalid
+		// The tool message is a JSON string. Parse it, falling back to the original if invalid.
 		let textData;
 		try {
 			textData = JSON.parse( firstContentText );
@@ -258,21 +276,24 @@ export default function convertToolMessagesToComponents( {
 			return [ message ];
 		}
 
-		// Handle `show-component` tool message
+		// Handle `big_sky__show_component` tool message.
 		if ( textData.tool_id === 'big_sky__show_component' ) {
-			const handler = isAmAbilitiesEnabled() ? handleShowComponentAm : handleShowComponentBs;
+			const handleShowComponent = isAmAbilitiesEnabled()
+				? handleShowComponentAm
+				: handleShowComponentBs;
 
-			return handler( {
+			return handleShowComponent( {
 				message,
 				data: ( textData.data ?? {} ) as ShowComponentData,
 				index,
 				array,
 				getChatComponent,
+				onSubmit,
 				currentPostId,
 			} );
 		}
 
-		// Handle `apply-block-edits` tool message
+		// Handle `big_sky__apply_block_edits` tool message.
 		if (
 			textData.tool_id === 'big_sky__apply_block_edits' &&
 			typeof textData.data?.summary === 'string'
@@ -290,7 +311,7 @@ export default function convertToolMessagesToComponents( {
 			];
 		}
 
-		// Handle `wordpress-com-support` tool message
+		// Handle `big_sky__wordpress_com_support` tool message.
 		if (
 			textData.tool_id === 'big_sky__wordpress_com_support' &&
 			typeof textData.data === 'string'
@@ -308,7 +329,7 @@ export default function convertToolMessagesToComponents( {
 			];
 		}
 
-		// Handle start over tool message
+		// Handle `big_sky__client_assistants` start-over tool message.
 		if (
 			textData.tool_id === 'big_sky__client_assistants' &&
 			textData.data?.assistantId === 'big-sky-site-admin'

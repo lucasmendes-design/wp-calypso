@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { cleanup, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import VariationPicker from '../variation-picker';
 
@@ -42,10 +42,6 @@ const mockVariations = [
 ];
 
 describe( 'VariationPicker', () => {
-	afterEach( () => {
-		cleanup();
-	} );
-
 	it( 'shows navigation buttons when variations exceed maxToShow', () => {
 		const { container } = render(
 			<VariationPicker
@@ -56,7 +52,7 @@ describe( 'VariationPicker', () => {
 			/>
 		);
 
-		const arrows = container.querySelector( '.agents-manager__variation-picker-arrows' );
+		const arrows = container.querySelector( '.agents-manager-variation-picker__arrows' );
 		expect( arrows ).toBeInTheDocument();
 
 		const buttons = container.querySelectorAll( 'button' );
@@ -73,7 +69,7 @@ describe( 'VariationPicker', () => {
 			/>
 		);
 
-		const arrows = container.querySelector( '.agents-manager__variation-picker-arrows' );
+		const arrows = container.querySelector( '.agents-manager-variation-picker__arrows' );
 		expect( arrows ).not.toBeInTheDocument();
 	} );
 

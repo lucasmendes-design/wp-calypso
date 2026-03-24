@@ -7,20 +7,20 @@ import { unlock } from '../../utils/lock-unlock';
 import './style.scss';
 
 interface Props {
-	onNextStep: () => void;
+	onClick: () => void;
 }
 
-export default function NextStepButton( { onNextStep }: Props ) {
+export default function NextStepButton( { onClick }: Props ) {
 	const handleClick = async () => {
 		const { resetZoomLevel } = unlock( dispatch( blockEditorStore ) );
 		const { __unstableSetEditorMode } = dispatch( blockEditorStore );
 
 		await zoomIn( { resetZoomLevel, __unstableSetEditorMode } );
-		onNextStep();
+		onClick();
 	};
 
 	return (
-		<Button className="agents-manager__next-step-button" variant="primary" onClick={ handleClick }>
+		<Button className="agents-manager-next-step-button" variant="primary" onClick={ handleClick }>
 			{ __( 'Move to next step', '__i18n_text_domain__' ) }
 		</Button>
 	);

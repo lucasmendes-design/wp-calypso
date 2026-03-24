@@ -104,12 +104,14 @@ function getStyleValue(
 		return undefined;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic style path traversal
 	const source = element ? ( styles.styles.elements as any )?.[ element ] : styles.styles;
 
 	if ( ! source ) {
 		return undefined;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic style path traversal
 	return path.split( '.' ).reduce( ( obj: any, key: string ) => obj?.[ key ], source );
 }
 
@@ -388,6 +390,7 @@ export default function StylesPreview( {
 	const getPreviewButtonBackgroundColor = () => {
 		return resolveColor(
 			buttonBackground,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- deep nested access
 			( currentColorVariation?.styles?.elements as any )?.button?.color?.background,
 			globalPalette,
 			colorVarPalette,
@@ -513,12 +516,7 @@ export default function StylesPreview( {
 								</div>
 							) }
 							{ type === 'color' && (
-								<HStack
-									spacing={ 0 }
-									alignment="center"
-									style={ { margin: '0 0 0 10px' } }
-									className="color-swatch"
-								>
+								<HStack spacing={ 0 } alignment="center" style={ { margin: '0 0 0 10px' } }>
 									{ getColorsToShow().map( ( { slug, color }, index ) => (
 										<div
 											key={ `${ slug }_${ index }` }

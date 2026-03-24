@@ -59,7 +59,7 @@ describe( 'Variation', () => {
 				onSelect={ onSelect }
 			/>
 		);
-		fireEvent.keyDown( screen.getByRole( 'button' ), { keyCode: 13 } );
+		fireEvent.keyDown( screen.getByRole( 'button' ), { key: 'Enter' } );
 		expect( onSelect ).toHaveBeenCalledWith( mockVariation );
 	} );
 

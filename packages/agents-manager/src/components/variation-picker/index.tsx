@@ -116,10 +116,10 @@ export default function VariationPicker( {
 	}
 
 	return (
-		<div className="agents-manager__variation-picker picker-component">
+		<div className="agents-manager-variation-picker">
 			{ variationsToShow && variationsToShow.length > 0 && (
 				<VStack spacing={ 1 }>
-					<Grid gap={ 2 } columns={ 2 } className="agents-manager__variation-picker-grid">
+					<Grid gap={ 2 } columns={ 2 } className="agents-manager-variation-picker__grid">
 						{ variationsToShow.map( ( variation, index ) => (
 							<Tooltip key={ index } text={ type === 'font' ? variation.title : '' }>
 								<div>
@@ -139,7 +139,7 @@ export default function VariationPicker( {
 						) ) }
 					</Grid>
 					{ sortedVariations.length > maxToShow && (
-						<div className="agents-manager__variation-picker-arrows">
+						<div className="agents-manager-variation-picker__arrows">
 							<Button
 								label={ __( 'Previous', '__i18n_text_domain__' ) }
 								size="compact"
@@ -147,7 +147,7 @@ export default function VariationPicker( {
 								onClick={ revealPrevious }
 								disabled={ firstIndex === 0 }
 							/>
-							<div className="agents-manager__variation-picker-pager">
+							<div className="agents-manager-variation-picker__pager">
 								{ currentPage }/{ totalPages }
 							</div>
 							<Button

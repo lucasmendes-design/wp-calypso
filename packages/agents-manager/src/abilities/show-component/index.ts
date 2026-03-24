@@ -1,11 +1,9 @@
 import { __ } from '@wordpress/i18n';
 import { createCallback } from './create-callback';
 import type { ShowComponentDeps } from './create-callback';
-import type { Ability, AbilityResult } from '../types';
+import type { Ability, AbilityResult, ShowComponentType } from '../types';
 
-type ComponentType = 'button-picker' | 'font-picker' | 'color-picker' | 'pattern-picker';
-
-export const CHECKPOINT_KEYS: Record< ComponentType, string > = {
+export const CHECKPOINT_KEYS: Record< ShowComponentType, string > = {
 	'button-picker': 'button',
 	'font-picker': 'font',
 	'color-picker': 'color',
@@ -13,7 +11,7 @@ export const CHECKPOINT_KEYS: Record< ComponentType, string > = {
 };
 
 export interface ShowComponentInput {
-	type: ComponentType;
+	type: ShowComponentType;
 	props: Record< string, unknown >;
 	followUpTasks?: boolean;
 	zoomOut?: boolean;

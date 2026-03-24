@@ -104,33 +104,27 @@ const prependCurrentColorVariation = ( {
 
 interface Props {
 	variations: ColorVariation[];
-	customVariationTemplates: GlobalStyles[];
-	currentColor: string | null;
-	currentPaletteColors: PaletteColor[];
-	currentTheme: GlobalStyles | null;
-	onSetCurrentColor: ( color: string ) => void;
-	onVariationsReady: ( variations: ColorVariation[] ) => void;
-	onSelect: ( variation: ColorVariation ) => void;
-	onPaginate?: ( direction: 'prev' | 'next' ) => void;
-	globalStyles: GlobalStyles;
-	paletteColors: PaletteColor[];
-	themeColors: PaletteColor[];
+	customVariationTemplates?: GlobalStyles[];
+	currentColor?: string | null;
+	currentPaletteColors?: PaletteColor[];
+	currentTheme?: GlobalStyles | null;
+	onSelect?: ( variation: ColorVariation ) => void;
+	globalStyles?: GlobalStyles;
+	paletteColors?: PaletteColor[];
+	themeColors?: PaletteColor[];
 	currentColorVariation?: ColorVariation | null;
 }
 
 export default function ColorPicker( {
 	variations,
-	customVariationTemplates,
-	currentColor,
-	currentPaletteColors,
-	currentTheme,
-	onSetCurrentColor,
-	onVariationsReady,
-	onSelect,
-	onPaginate,
-	globalStyles,
-	paletteColors,
-	themeColors,
+	customVariationTemplates = [],
+	currentColor = null,
+	currentPaletteColors = [],
+	currentTheme = null,
+	onSelect = () => {},
+	globalStyles = {} as GlobalStyles,
+	paletteColors = [],
+	themeColors = [],
 	currentColorVariation,
 }: Props ) {
 	const [ colorVariations, setColorVariations ] = useState< ColorVariation[] >( [] );
@@ -145,12 +139,6 @@ export default function ColorPicker( {
 		} );
 
 		setColorVariations( prepared );
-		onVariationsReady( prepared );
-
-		// Ensure the current color is set
-		if ( prepared.length > 0 && prepared[ 0 ].title !== currentColor ) {
-			onSetCurrentColor( prepared[ 0 ].title );
-		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
 	}, [] );
 
@@ -164,7 +152,6 @@ export default function ColorPicker( {
 			maxToShow={ 4 }
 			type="color"
 			onSelect={ onSelect }
-			onPaginate={ onPaginate }
 			activeVariationTitle={ currentColor }
 			globalStyles={ globalStyles }
 			paletteColors={ paletteColors }

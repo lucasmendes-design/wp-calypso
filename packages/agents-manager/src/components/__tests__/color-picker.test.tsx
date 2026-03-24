@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ColorPicker from '../color-picker';
 
@@ -19,38 +19,12 @@ const defaultProps = {
 		{ title: 'Bold', settings: {}, styles: {} },
 		{ title: 'Pastel', settings: {}, styles: {} },
 	],
-	customVariationTemplates: [],
-	currentColor: null,
-	currentPaletteColors: [],
-	currentTheme: null,
-	onSetCurrentColor: jest.fn(),
-	onVariationsReady: jest.fn(),
-	onSelect: jest.fn(),
-	globalStyles: {},
-	paletteColors: [],
-	themeColors: [],
 };
 
 describe( 'ColorPicker', () => {
-	beforeEach( () => {
-		jest.clearAllMocks();
-	} );
-
 	it( 'renders VariationPicker with variations', () => {
-		const { getByTestId } = render( <ColorPicker { ...defaultProps } /> );
-		const picker = getByTestId( 'mock-variation-picker' );
-		expect( picker ).toBeInTheDocument();
-		expect( picker ).toHaveAttribute( 'data-count', '2' );
-	} );
-
-	it( 'calls onVariationsReady on mount', () => {
 		render( <ColorPicker { ...defaultProps } /> );
-		expect( defaultProps.onVariationsReady ).toHaveBeenCalledWith(
-			expect.arrayContaining( [
-				expect.objectContaining( { title: 'Bold' } ),
-				expect.objectContaining( { title: 'Pastel' } ),
-			] )
-		);
+		expect( screen.getByTestId( 'mock-variation-picker' ) ).toHaveAttribute( 'data-count', '2' );
 	} );
 
 	it( 'renders nothing when no variations are provided', () => {
@@ -59,7 +33,6 @@ describe( 'ColorPicker', () => {
 	} );
 
 	it( 'prepends current color variation when not in the list', () => {
-		const onVariationsReady = jest.fn();
 		render(
 			<ColorPicker
 				{ ...defaultProps }
@@ -67,11 +40,8 @@ describe( 'ColorPicker', () => {
 				currentPaletteColors={ [ { color: '#ff0000', slug: 'primary', name: 'Primary' } ] }
 				currentTheme={ { styles: { color: { text: '#000' } } } }
 				customVariationTemplates={ [ { styles: { color: { text: '#000' } } } ] }
-				onVariationsReady={ onVariationsReady }
 			/>
 		);
-		expect( onVariationsReady ).toHaveBeenCalledWith(
-			expect.arrayContaining( [ expect.objectContaining( { title: 'Custom Color' } ) ] )
-		);
+		expect( screen.getByTestId( 'mock-variation-picker' ) ).toHaveAttribute( 'data-count', '3' );
 	} );
 } );

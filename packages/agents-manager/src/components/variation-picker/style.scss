@@ -1,37 +1,45 @@
-.agents-manager__variation-picker {
+.agents-manager-variation-picker {
 	position: relative;
 	pointer-events: all;
 	min-height: unset;
-}
 
-.agents-manager__variation-picker-grid {
-	.block-editor-iframe__scale-container {
-		flex: 1 0 fit-content;
+	&__grid {
+		.block-editor-iframe__scale-container {
+			flex: 1 0 fit-content;
+			display: flex;
+		}
+	}
+
+	&__arrows {
 		display: flex;
+		align-items: center;
+		align-self: end;
+
+		.components-button {
+			color: var( --color-muted-foreground );
+
+			&:not( :disabled ):hover {
+				color: var( --color-foreground );
+			}
+
+			&:disabled {
+				opacity: 0.5;
+			}
+
+			&.is-pressed {
+				color: var( --color-foreground );
+				background-color: var( --color-muted );
+			}
+		}
+	}
+
+	&__pager {
+		color: var( --color-muted-foreground );
 	}
 }
 
-.agents-manager__variation-picker-arrows {
-	bottom: -40px;
-
-	.components-button {
-		color: var(--color-muted-foreground);
-
-		&:not( :disabled ):hover {
-			color: var(--color-foreground);
-		}
-
-		&:disabled {
-			opacity: 0.5;
-		}
-
-		&.is-pressed {
-			color: var(--color-foreground);
-			background-color: var(--color-muted);
-		}
-	}
-}
-
-.agents-manager__variation-picker-pager {
-	color: var(--color-muted-foreground);
+// Reduce gap between arrows and message actions (undo/feedback buttons).
+.agenttic .Message-module_bubble:has( .agents-manager-variation-picker__arrows )
+	+ .MessageActions-module_container {
+	margin-top: -40px;
 }

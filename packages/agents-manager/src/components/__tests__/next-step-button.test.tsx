@@ -44,16 +44,16 @@ jest.mock( '../../utils/canvas-zoom', () => ( {
 
 describe( 'NextStepButton', () => {
 	it( 'renders the button with correct text', () => {
-		render( <NextStepButton onNextStep={ jest.fn() } /> );
+		render( <NextStepButton onClick={ jest.fn() } /> );
 		expect( screen.getByText( 'Move to next step' ) ).toBeInTheDocument();
 	} );
 
-	it( 'calls `onNextStep` after zoom in', async () => {
-		const onNextStep = jest.fn();
-		render( <NextStepButton onNextStep={ onNextStep } /> );
+	it( 'calls `onClick` after zoom in', async () => {
+		const onClick = jest.fn();
+		render( <NextStepButton onClick={ onClick } /> );
 		await userEvent.click( screen.getByText( 'Move to next step' ) );
 		await waitFor( () => {
-			expect( onNextStep ).toHaveBeenCalledTimes( 1 );
+			expect( onClick ).toHaveBeenCalledTimes( 1 );
 		} );
 	} );
 } );

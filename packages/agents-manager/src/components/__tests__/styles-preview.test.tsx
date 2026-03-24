@@ -106,7 +106,8 @@ describe( 'StylesPreview', () => {
 		const { container } = render(
 			<StylesPreview { ...defaultProps } label="Color Preview" type="color" />
 		);
-		expect( container.querySelector( '.color-swatch' ) ).toBeInTheDocument();
+		// Color swatches are circular divs with `border-radius: 100%`.
+		expect( container.querySelector( 'div[style*="border-radius"]' ) ).toBeInTheDocument();
 	} );
 
 	it( 'renders button preview when type is "button"', () => {
