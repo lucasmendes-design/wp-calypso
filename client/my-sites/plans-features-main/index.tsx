@@ -978,7 +978,6 @@ const PlansFeaturesMain = ( {
 										enableTermSavingsPriceDisplay={ enableTermSavingsPriceDisplay }
 										showSimplifiedBillingDescription={ isInSignup }
 										showBillingDescriptionForIncreasedRenewalPrice={ renewalPricingVariation }
-										isVar1dVariant={ false }
 										isVar4Variant={ isVar4Variant }
 										isExperimentVariant={ isExperimentVariant }
 									/>
