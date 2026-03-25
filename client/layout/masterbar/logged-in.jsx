@@ -8,7 +8,7 @@ import { __, _x, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { parse } from 'qs';
-import { Component } from 'react';
+import { Component, Suspense, lazy } from 'react';
 import { connect } from 'react-redux';
 import ReaderIcon from 'calypso/assets/icons/reader/reader-icon';
 import AsyncLoad from 'calypso/components/async-load';
@@ -63,7 +63,18 @@ import { getCurrentLayoutFocus } from 'calypso/state/ui/layout-focus/selectors';
 import { getMostRecentlySelectedSiteId, getSectionGroup } from 'calypso/state/ui/selectors';
 import Item from './item';
 import Masterbar from './masterbar';
+import HelpCenterIcon from './masterbar-help-center/help-center-icon';
 import Notifications from './masterbar-notifications/notifications-button';
+
+// Lazy-load the interactive Help Center on the client only.
+// On the server the lazy ref is null so renderHelpCenter() renders a static
+// icon placeholder — no Suspense boundary reaches renderToString, avoiding
+// hydration mismatches.  On the client, Suspense shows the same static icon
+// as its fallback until the lazy chunk resolves.
+const LazyHelpCenter =
+	typeof window !== 'undefined' ? lazy( () => import( './masterbar-help-center' ) ) : null;
+const LazyAgentsManager =
+	typeof window !== 'undefined' ? lazy( () => import( './masterbar-agents-manager' ) ) : null;
 
 class MasterbarLoggedIn extends Component {
 	static propTypes = {
@@ -780,25 +791,27 @@ class MasterbarLoggedIn extends Component {
 
 	renderHelpCenter() {
 		const { siteId, useUnifiedAgent } = this.props;
+		const tooltip = __( 'Help' );
+		const staticIcon = (
+			<Item
+				className="masterbar__item-help"
+				icon={ <HelpCenterIcon hasUnread={ false } /> }
+				tooltip={ tooltip }
+			/>
+		);
 
-		if ( useUnifiedAgent ) {
-			return (
-				<AsyncLoad
-					require="./masterbar-agents-manager"
-					siteId={ siteId }
-					tooltip={ __( 'Help' ) }
-					placeholder={ null }
-				/>
-			);
+		const InteractiveComponent = useUnifiedAgent ? LazyAgentsManager : LazyHelpCenter;
+
+		// SSR: render static icon (no Suspense boundary).
+		if ( ! InteractiveComponent ) {
+			return staticIcon;
 		}
 
+		// Client: Suspense shows the static icon until the lazy chunk loads.
 		return (
-			<AsyncLoad
-				require="./masterbar-help-center"
-				siteId={ siteId }
-				tooltip={ __( 'Help' ) }
-				placeholder={ null }
-			/>
+			<Suspense fallback={ staticIcon }>
+				<InteractiveComponent siteId={ siteId } tooltip={ tooltip } />
+			</Suspense>
 		);
 	}
 

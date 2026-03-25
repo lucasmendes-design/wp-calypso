@@ -39,13 +39,10 @@ export default async function loadOmnibar( events: OmnibarEvents ) {
 	}
 
 	// Hydrate the server-rendered omnibar with null props to match SSR output,
-	// then immediately re-render with real data.  Suppress recoverable hydration
-	// errors caused by Suspense boundaries inside MasterbarLoggedIn that
-	// renderToString cannot serialize (see logged-in.jsx for the proper fix).
+	// then immediately re-render with real data.
 	const root = hydrateRoot(
 		container,
-		<InterimOmnibar user={ null } site={ null } currentRoute={ window.location.pathname } />,
-		{ onRecoverableError() {} }
+		<InterimOmnibar user={ null } site={ null } currentRoute={ window.location.pathname } />
 	);
 
 	const site = user.primary_blog
