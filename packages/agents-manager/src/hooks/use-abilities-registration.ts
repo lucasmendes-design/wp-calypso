@@ -53,12 +53,17 @@ export default function useAbilitiesRegistration( deps: AbilitiesDeps ): void {
 					label: 'Big Sky',
 					description: 'Big Sky abilities',
 				} );
-
-				for ( const ability of abilities ) {
-					await registerAbility( ability );
-				}
 			} catch {
-				// Category or ability may already be registered.
+				// Category may already be registered.
+			}
+
+			for ( const ability of abilities ) {
+				try {
+					await registerAbility( ability );
+				} catch ( error ) {
+					// eslint-disable-next-line no-console
+					console.warn( `[AgentsManager] Failed to register ability: ${ ability.name }`, error );
+				}
 			}
 		} )();
 	}, [] );

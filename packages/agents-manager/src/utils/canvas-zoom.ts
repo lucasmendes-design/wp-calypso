@@ -1,3 +1,7 @@
+const ZOOM_OUT_LEVEL = 0.5;
+const EDITOR_MODE_ZOOM_OUT = 'zoom-out';
+const EDITOR_MODE_EDIT = 'edit';
+
 /**
  * Get the editor canvas iframe and its inner elements.
  */
@@ -54,8 +58,8 @@ export async function zoomOut(
 ): Promise< void > {
 	const { canvasIframeRoot, canvasIframeBody } = getCanvasIframeElements();
 
-	dispatchers.setZoomLevel( 0.5 );
-	dispatchers.__unstableSetEditorMode( 'zoom-out' );
+	dispatchers.setZoomLevel( ZOOM_OUT_LEVEL );
+	dispatchers.__unstableSetEditorMode( EDITOR_MODE_ZOOM_OUT );
 
 	if ( options.blockDoubleClick && canvasIframeBody ) {
 		canvasIframeBody.addEventListener( 'dblclick', blockDblclick, true );
@@ -81,7 +85,7 @@ export async function zoomIn( dispatchers: ZoomInDispatchers ): Promise< void > 
 	const { canvasIframeRoot } = getCanvasIframeElements();
 
 	dispatchers.resetZoomLevel();
-	dispatchers.__unstableSetEditorMode( 'edit' );
+	dispatchers.__unstableSetEditorMode( EDITOR_MODE_EDIT );
 
 	await Promise.resolve();
 

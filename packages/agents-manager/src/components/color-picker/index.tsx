@@ -3,6 +3,8 @@ import useApplyColorVariation from '../../hooks/use-apply-color-variation';
 import VariationPicker from '../variation-picker';
 import type { ColorVariation, GlobalStyles, PaletteColor } from '../styles-preview';
 
+const MAX_COLORS_TO_SHOW = 4;
+
 enum PaletteType {
 	Bold = 'Bold',
 	BoldText = 'BoldText',
@@ -151,7 +153,7 @@ export default function ColorPicker( {
 	return (
 		<VariationPicker
 			variations={ colorVariations }
-			maxToShow={ 4 }
+			maxToShow={ MAX_COLORS_TO_SHOW }
 			type="color"
 			onSelect={ ( variation ) => {
 				applyColorVariation( variation );
