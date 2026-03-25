@@ -1,14 +1,11 @@
 import { createElement, useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { undo, Icon } from '@wordpress/icons';
+import type { UseCheckpointReturn } from './use-checkpoint';
 import type { UseAgentChatReturn, UIMessage } from '@automattic/agenttic-client';
 
 type RegisterMessageActions = UseAgentChatReturn[ 'registerMessageActions' ];
-
-interface CheckpointActions {
-	hasCheckpoint: ( id: string ) => boolean;
-	restoreCheckpoint: ( id: string ) => Promise< void >;
-}
+type CheckpointActions = Pick< UseCheckpointReturn, 'hasCheckpoint' | 'restoreCheckpoint' >;
 
 /**
  * Gets the checkpoint ID embedded in a tool message, or an empty string
