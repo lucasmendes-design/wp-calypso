@@ -1,4 +1,4 @@
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import useApplyColorVariation from '../../hooks/use-apply-color-variation';
 import VariationPicker from '../variation-picker';
 import type { ColorVariation, GlobalStyles, PaletteColor } from '../styles-preview';
@@ -130,21 +130,19 @@ export default function ColorPicker( {
 	themeColors = [],
 	currentColorVariation,
 }: Props ) {
+	const [ activeColor, setActiveColor ] = useState( currentColor );
 	const applyColorVariation = useApplyColorVariation();
-	const [ colorVariations, setColorVariations ] = useState< ColorVariation[] >( [] );
 
-	useEffect( () => {
-		const prepared = prependCurrentColorVariation( {
+	// Prepare variations synchronously so the initial highlight works on first render.
+	const [ colorVariations ] = useState( () =>
+		prependCurrentColorVariation( {
 			colorVariations: variations,
 			currentColor,
 			currentPaletteColors,
 			currentTheme,
 			customVariationTemplates,
-		} );
-
-		setColorVariations( prepared );
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
-	}, [] );
+		} )
+	);
 
 	if ( ! colorVariations.length ) {
 		return null;
@@ -157,9 +155,10 @@ export default function ColorPicker( {
 			type="color"
 			onSelect={ ( variation ) => {
 				applyColorVariation( variation );
+				setActiveColor( variation.title );
 				onSelect( variation );
 			} }
-			activeVariationTitle={ currentColor }
+			activeVariationTitle={ activeColor }
 			globalStyles={ globalStyles }
 			paletteColors={ paletteColors }
 			themeColors={ themeColors }

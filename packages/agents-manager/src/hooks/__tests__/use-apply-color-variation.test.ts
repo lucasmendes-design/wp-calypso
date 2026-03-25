@@ -1,0 +1,80 @@
+/**
+ * @jest-environment jsdom
+ */
+import { renderHook, act } from '@testing-library/react';
+import useApplyColorVariation from '../use-apply-color-variation';
+
+const mockEditEntityRecord = jest.fn();
+let mockGlobalStylesId: string | null = 'global-styles-1';
+const mockCurrentRecord = {
+	settings: { color: { palette: { theme: [ { slug: 'primary', color: '#000' } ] } } },
+	styles: { color: { text: '#000', background: '#fff' } },
+};
+
+jest.mock( '@wordpress/core-data', () => ( { store: 'core' } ) );
+
+jest.mock( '@wordpress/data', () => ( {
+	useSelect: ( callback: ( select: ( store: string ) => unknown ) => unknown ) =>
+		callback( () => ( {
+			__experimentalGetCurrentGlobalStylesId: () => mockGlobalStylesId,
+			getEditedEntityRecord: () => ( mockGlobalStylesId ? mockCurrentRecord : null ),
+		} ) ),
+	useDispatch: () => ( { editEntityRecord: mockEditEntityRecord } ),
+} ) );
+
+describe( 'useApplyColorVariation', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+		mockGlobalStylesId = 'global-styles-1';
+	} );
+
+	it( 'merges variation into global styles', () => {
+		const { result } = renderHook( () => useApplyColorVariation() );
+
+		act( () => {
+			result.current( {
+				title: 'Bold',
+				settings: { color: { palette: { theme: [ { slug: 'accent', color: '#f00' } ] } } },
+				styles: { color: { text: '#111', background: '#eee' } },
+			} );
+		} );
+
+		expect( mockEditEntityRecord ).toHaveBeenCalledWith(
+			'root',
+			'globalStyles',
+			'global-styles-1',
+			expect.objectContaining( {
+				settings: { color: { palette: { theme: [ { slug: 'accent', color: '#f00' } ] } } },
+				styles: { color: { text: '#111', background: '#eee' } },
+			} )
+		);
+	} );
+
+	it( 'keeps current settings when variation has no settings', () => {
+		const { result } = renderHook( () => useApplyColorVariation() );
+
+		act( () => {
+			result.current( { title: 'Minimal', styles: { color: { text: '#222' } } } );
+		} );
+
+		expect( mockEditEntityRecord ).toHaveBeenCalledWith(
+			'root',
+			'globalStyles',
+			'global-styles-1',
+			expect.objectContaining( {
+				settings: mockCurrentRecord.settings,
+			} )
+		);
+	} );
+
+	it( 'does nothing when global styles ID is missing', () => {
+		mockGlobalStylesId = null;
+		const { result } = renderHook( () => useApplyColorVariation() );
+
+		act( () => {
+			result.current( { title: 'Test' } );
+		} );
+
+		expect( mockEditEntityRecord ).not.toHaveBeenCalled();
+	} );
+} );

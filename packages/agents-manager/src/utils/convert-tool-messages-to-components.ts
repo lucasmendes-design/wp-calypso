@@ -53,8 +53,9 @@ interface ShowComponentData {
 	type: ShowComponentType;
 	props: Record< string, unknown >;
 	followUpTasks?: boolean;
-	isCurrent: boolean;
+	isCurrent?: boolean;
 	postId?: number;
+	calypsoCheckpointId?: string;
 }
 
 interface ShowComponentHandlerArgs {
