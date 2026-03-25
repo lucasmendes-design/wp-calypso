@@ -4,6 +4,7 @@ import { zoomOut } from '../../utils/canvas-zoom';
 import { unlock } from '../../utils/lock-unlock';
 import { CHECKPOINT_KEYS } from './index';
 import type { ShowComponentCallback, ShowComponentInput } from './index';
+import type { UseCheckpointReturn } from '../../hooks/use-checkpoint';
 import type { AbilityResult } from '../types';
 
 /**
@@ -14,10 +15,8 @@ export interface ShowComponentDeps {
 	currentPostId?: number;
 	/** Get the map of compressed client IDs to real block client IDs. */
 	getClientIdMap: () => Record< string, string >;
-	/** Set a checkpoint so the action can be undone. */
-	setCheckpoint: ( id: string, keys: string[] ) => void;
-	/** Register a new page in the checkpoint for undo. */
-	addNewPageToCheckpoint: ( pageId: string ) => void;
+	/** Checkpoint utilities for undo support. */
+	checkpoint: Pick< UseCheckpointReturn, 'setCheckpoint' | 'addNewPageToCheckpoint' >;
 	/** Whether a site is currently being built. Blocks double-click during zoom-out. */
 	isBuildingSite?: boolean;
 }
@@ -55,25 +54,24 @@ export function createCallback( deps: ShowComponentDeps ): ShowComponentCallback
 				);
 			}
 
-			// Resolve compressed `clientId` to real block client ID.
-			const clientIdMap = deps.getClientIdMap();
-			if ( clientId && clientIdMap[ clientId ] ) {
-				props.clientId = clientIdMap[ clientId ];
+			// Resolve compressed `clientId` and attach `insertIndex` if provided.
+			const resolvedClientId = clientId ? deps.getClientIdMap()[ clientId ] : undefined;
+			if ( resolvedClientId ) {
+				props.clientId = resolvedClientId;
 			}
-			if ( insertIndex !== undefined && insertIndex >= 0 ) {
+			if ( insertIndex !== undefined ) {
 				props.insertIndex = insertIndex;
 			}
 
-			const currentPostId = deps.currentPostId;
-
 			// Set checkpoint so the action can be undone.
 			if ( messageId ) {
-				const checkpointKey =
-					type === 'pattern-picker' && props?.newPageId ? 'page' : CHECKPOINT_KEYS[ type ];
-				deps.setCheckpoint( messageId, [ checkpointKey ] );
+				const isNewPage = type === 'pattern-picker' && !! props?.newPageId;
+				const checkpointKey = isNewPage ? 'page' : CHECKPOINT_KEYS[ type ];
 
-				if ( type === 'pattern-picker' && props?.newPageId ) {
-					deps.addNewPageToCheckpoint( props.newPageId as string );
+				deps.checkpoint.setCheckpoint( messageId, [ checkpointKey ] );
+
+				if ( isNewPage ) {
+					deps.checkpoint.addNewPageToCheckpoint( props.newPageId as string );
 				}
 			}
 
@@ -88,7 +86,7 @@ export function createCallback( deps: ShowComponentDeps ): ShowComponentCallback
 						props,
 						followUpTasks,
 						isCurrent: true,
-						postId: currentPostId,
+						postId: deps.currentPostId,
 						calypsoCheckpointId: messageId,
 					},
 				} ),

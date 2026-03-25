@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { LOCAL_TOOL_RUNNING_MESSAGE } from '../../constants';
 import { useAgentsManagerContext } from '../../contexts';
 import useAbilitiesRegistration from '../../hooks/use-abilities-registration';
+import useCheckpoint from '../../hooks/use-checkpoint';
 import useCheckpointAction from '../../hooks/use-checkpoint-action';
 import useConversation from '../../hooks/use-conversation';
 import useCopyAction from '../../hooks/use-copy-action';
@@ -153,9 +154,12 @@ export default function OrchestratorChat( {
 	useSaveNewChatRoute( messages );
 
 	const enableAmAbilities = isAmAbilitiesEnabled();
+	const amCheckpoint = useCheckpoint();
+	const bsCheckpoint = useExternalCheckpoint?.();
+	const checkpoint = enableAmAbilities ? amCheckpoint : bsCheckpoint;
 
 	// Register an "Undo" action on agent messages with checkpoints.
-	useCheckpointAction( registerMessageActions, useExternalCheckpoint );
+	useCheckpointAction( registerMessageActions, checkpoint );
 
 	// Register thumbs-up/down feedback actions on agent messages.
 	const { showFeedbackInput, submitFeedbackText, resetFeedback } = useFeedbackAction( {
@@ -249,8 +253,10 @@ export default function OrchestratorChat( {
 		// eslint-disable-next-line react-hooks/rules-of-hooks -- stable conditional (URL param)
 		useAbilitiesRegistration( {
 			showComponent: {
+				currentPostId,
 				getClientIdMap: () => ( {} ), // TODO: wire from big-sky context provider
 				isBuildingSite,
+				checkpoint: amCheckpoint,
 			},
 		} );
 	} else {
