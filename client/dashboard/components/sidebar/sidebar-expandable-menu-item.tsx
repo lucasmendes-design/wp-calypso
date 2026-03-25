@@ -5,9 +5,8 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
-import { Children, cloneElement, isValidElement, useId, useState, useEffect } from 'react';
+import { useId, useState, useEffect } from 'react';
 import { useAnalytics } from '../../app/analytics';
-import { SidebarMenuItem } from './sidebar-menu-item';
 
 import './sidebar-expandable-menu-item.scss';
 
@@ -21,7 +20,7 @@ interface SidebarExpandableMenuItemProps {
 	label: string;
 	icon?: React.JSX.Element;
 	to: string;
-	children: React.ReactNode;
+	children: ( icon: React.JSX.Element ) => React.ReactNode;
 }
 
 export function SidebarExpandableMenuItem( {
@@ -66,12 +65,7 @@ export function SidebarExpandableMenuItem( {
 			</Button>
 			{ isOpen && (
 				<VStack id={ panelId } spacing={ 1 }>
-					{ Children.map( children, ( child ) => {
-						if ( isValidElement( child ) && child.type === SidebarMenuItem && ! child.props.icon ) {
-							return cloneElement( child as React.ReactElement, { icon: dotIcon } );
-						}
-						return child;
-					} ) }
+					{ children( dotIcon ) }
 				</VStack>
 			) }
 		</VStack>
